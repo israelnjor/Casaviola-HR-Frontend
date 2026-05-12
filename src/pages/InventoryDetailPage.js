@@ -22,8 +22,7 @@ function InventoryDetailPage() {
   const emptyRow = { name: '', category: '', qtyIn: 0, unit: '', unitCost: 0, supplier: '', photoUrl: '', notes: '', condition: 'Good' };
   const [rows, setRows] = useState([{ ...emptyRow }]);
 
-  useEffect(() => { fetchData(); }, [listId]);
-
+  useEffect(() => { fetchData(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const fetchData = async () => {
     try {
       const [itemsRes, listsRes] = await Promise.all([

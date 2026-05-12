@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllAttendance, createAttendance, updateAttendance, deleteAttendance } from '../services/attendanceService';
+import { getAllAttendance, createAttendance, deleteAttendance } from '../services/attendanceService';
 import { getAllStaff } from '../services/staffService';
 
 function AttendancePage() {
