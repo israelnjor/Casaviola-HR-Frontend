@@ -13,7 +13,7 @@ function StaffPage() {
   const [search, setSearch] = useState('');
   const [filterDept, setFilterDept] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
-  const { isMobile } = useWindowSize();
+  const { isMobile, isTablet } = useWindowSize();
   const isSmall = isMobile || isTablet;
 
 
