@@ -97,7 +97,7 @@ function StaffPage() {
       {/* Stat Cards */}
       <div style={{ 
              display: 'grid', 
-             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+             gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : 'repeat(4, 1fr)', 
              gap: 16, 
              marginBottom: 16 
         }}>
@@ -117,7 +117,7 @@ function StaffPage() {
       {/* Department Breakdown */}
       <div style={{ 
              display: 'grid', 
-             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)', 
+             gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(5, 1fr)', 
              gap: 12, 
              marginBottom: 20 
         }}>

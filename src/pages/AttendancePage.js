@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAllAttendance, createAttendance, deleteAttendance } from '../services/attendanceService';
 import { getAllStaff } from '../services/staffService';
+import useWindowSize from '../hooks/useWindowSize';
 
 function AttendancePage() {
   const [records, setRecords] = useState([]);
@@ -12,9 +13,10 @@ function AttendancePage() {
     new Date().toISOString().slice(0, 10)
   );
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const { isMobile, isTablet } = useWindowSize();
+  const isSmall = isMobile || isTablet;
+
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     try {
@@ -71,21 +73,26 @@ function AttendancePage() {
   if (loading) return <div style={styles.loading}>Loading...</div>;
 
   return (
-    <div style={styles.page}>
+    <div style={{ ...styles.page, padding: isSmall ? '20px 16px' : '40px' }}>
 
       {/* Header */}
-      <div style={styles.header}>
+      <div style={{ ...styles.header, flexDirection: isSmall ? 'column' : 'row', alignItems: isSmall ? 'flex-start' : 'center', gap: isSmall ? 12 : 0 }}>
         <div>
-          <h1 style={styles.title}>Attendance</h1>
+          <h1 style={{ ...styles.title, fontSize: isSmall ? 22 : 26 }}>Attendance</h1>
           <p style={styles.subtitle}>Track daily staff attendance</p>
         </div>
-        <button style={styles.addBtn} onClick={() => setShowModal(true)}>
+        <button style={{ ...styles.addBtn}} onClick={() => setShowModal(true)}>
           + Log Attendance
         </button>
       </div>
 
-      {/* Stats */}
-      <div style={styles.statsRow}>
+      {/* Stat Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : 'repeat(4, 1fr)',
+        gap: 12,
+        marginBottom: 20,
+      }}>
         {[
           { label: 'Present', value: filteredRecords.filter(r => r.status === 'Present').length, color: '#2e7d32', bg: '#e8f5e9' },
           { label: 'Late', value: filteredRecords.filter(r => r.status === 'Late').length, color: '#f57f17', bg: '#fff8e1' },
@@ -93,14 +100,14 @@ function AttendancePage() {
           { label: 'Total Staff', value: staff.length, color: '#5c3d8f', bg: '#ede8f5' },
         ].map((s, i) => (
           <div key={i} style={{ ...styles.statCard, background: s.bg, borderColor: s.color + '33' }}>
-            <div style={{ fontSize: 28, fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.value}</div>
+            <div style={{ fontSize: isSmall ? 22 : 28, fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.value}</div>
             <div style={{ fontSize: 12, color: s.color, fontWeight: 600, marginTop: 4 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Date Filter */}
-      <div style={styles.dateRow}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
         <span style={styles.dateLabel}>Viewing:</span>
         <input
           type="date"
@@ -112,8 +119,8 @@ function AttendancePage() {
       </div>
 
       {/* Table */}
-      <div style={styles.tableWrap}>
-        <table style={styles.table}>
+      <div style={{ ...styles.tableWrap, overflowX: 'auto' }}>
+        <table style={{ ...styles.table, minWidth: isSmall ? 600 : '100%' }}>
           <thead>
             <tr>
               {['Employee', 'Date', 'Clock In', 'Clock Out', 'Status', 'Notes', 'Actions'].map(col => (
@@ -155,16 +162,41 @@ function AttendancePage() {
         </table>
       </div>
 
+      {/* Full Log */}
+      <div style={{ ...styles.tableWrap, overflowX: 'auto', marginTop: 16 }}>
+        <h3 style={{ padding: '16px 20px', fontSize: 16, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif', borderBottom: '1px solid #f0eaf8' }}>Full Attendance Log</h3>
+        <table style={{ ...styles.table, minWidth: isSmall ? 600 : '100%' }}>
+          <thead>
+            <tr>
+              {['Employee', 'Date', 'Clock In', 'Clock Out', 'Status'].map(col => (
+                <th key={col} style={styles.th}>{col}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[...records].reverse().map((a, i) => (
+              <tr key={a._id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8ff' }}>
+                <td style={{ ...styles.td, fontWeight: 500 }}>{a.staff?.fullName || 'Unknown'}</td>
+                <td style={{ ...styles.td, color: '#aaa' }}>{a.date?.slice(0, 10)}</td>
+                <td style={styles.td}>{a.clockIn}</td>
+                <td style={styles.td}>{a.clockOut || '—'}</td>
+                <td style={styles.td}><span style={statusStyle(a.status)}>{a.status}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       {/* Modal */}
       {showModal && (
         <div style={styles.overlay}>
-          <div style={styles.modal}>
+          <div style={{ ...styles.modal, padding: isSmall ? 20 : 32 }}>
             <div style={styles.modalHeader}>
               <h2 style={styles.modalTitle}>Log Attendance</h2>
               <button style={styles.closeBtn} onClick={() => setShowModal(false)}>✕</button>
             </div>
 
-            <div style={styles.formGrid}>
+            <div style={{ display: 'grid', gridTemplateColumns: isSmall ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 16 }}>
               <div>
                 <label style={styles.formLabel}>Staff Member</label>
                 <select style={styles.input} value={form.staff || ''} onChange={e => setForm({ ...form, staff: e.target.value })}>
@@ -174,17 +206,14 @@ function AttendancePage() {
                   ))}
                 </select>
               </div>
-
               <div>
                 <label style={styles.formLabel}>Date</label>
                 <input type='date' style={styles.input} value={form.date || ''} onChange={e => setForm({ ...form, date: e.target.value })} />
               </div>
-
               <div>
                 <label style={styles.formLabel}>Clock In</label>
                 <input type='time' style={styles.input} value={form.clockIn || ''} onChange={e => setForm({ ...form, clockIn: e.target.value })} />
               </div>
-
               <div>
                 <label style={styles.formLabel}>Clock Out</label>
                 <input type='time' style={styles.input} value={form.clockOut || ''} onChange={e => setForm({ ...form, clockOut: e.target.value })} />
@@ -197,7 +226,7 @@ function AttendancePage() {
             </div>
 
             <div style={{ fontSize: 12, color: '#aaa', marginBottom: 16 }}>
-              ℹ️ Status is auto-detected — clock in after 08:15 is marked as Late.
+              ℹ️ Clock-in after 08:15 is automatically marked as Late.
             </div>
 
             <div style={styles.modalFooter}>
@@ -213,15 +242,13 @@ function AttendancePage() {
 }
 
 const styles = {
-  page: { minHeight: '100vh', background: '#f5f0eb', padding: '40px' },
+  page: { minHeight: '100vh', background: '#f5f0eb' },
   loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#5c3d8f' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 },
-  title: { fontSize: 26, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
+  header: { display: 'flex', justifyContent: 'space-between', marginBottom: 24 },
+  title: { fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
   subtitle: { color: '#999', marginTop: 4, fontSize: 13 },
   addBtn: { background: '#5c3d8f', color: '#fff', border: 'none', padding: '11px 22px', borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: 'pointer' },
-  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 },
-  statCard: { padding: '20px 24px', borderRadius: 12, border: '1px solid', textAlign: 'center' },
-  dateRow: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 },
+  statCard: { padding: '16px', borderRadius: 12, border: '1px solid', textAlign: 'center' },
   dateLabel: { fontSize: 13, color: '#888', fontWeight: 500 },
   dateInput: { padding: '8px 12px', borderRadius: 8, border: '1px solid #e0d8f0', fontSize: 14, outline: 'none', fontFamily: 'inherit' },
   dateCount: { fontSize: 13, color: '#5c3d8f', fontWeight: 600 },
@@ -235,11 +262,10 @@ const styles = {
   subRow: { fontSize: 12, color: '#aaa', marginTop: 3 },
   removeBtn: { padding: '6px 14px', borderRadius: 7, border: 'none', background: '#fce4ec', color: '#c62828', fontWeight: 600, fontSize: 12, cursor: 'pointer' },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 },
-  modal: { background: '#fff', borderRadius: 20, padding: 32, width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto' },
+  modal: { background: '#fff', borderRadius: 20, width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 22, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
   closeBtn: { background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#888' },
-  formGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 },
   formLabel: { display: 'block', fontSize: 12, color: '#888', marginBottom: 6, fontWeight: 500 },
   input: { width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid #e0d8f0', fontSize: 14, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' },
   modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 },

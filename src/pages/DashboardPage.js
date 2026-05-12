@@ -112,7 +112,7 @@ function DashboardPage() {
       {/* Quick Stats */}
       <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', 
+            gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : isTablet ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)', 
             gap: 16, 
             marginBottom: 20 
           }}>
