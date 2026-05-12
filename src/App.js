@@ -9,11 +9,33 @@ import PerformancePage from './pages/PerformancePage';
 import InventoryPage from './pages/InventoryPage';
 import InventoryDetailPage from './pages/InventoryDetailPage';
 import LoginPage from './pages/LoginPage';
+import useWindowSize from './hooks/useWindowSize';
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('casaviola_token');
   return token ? children : <Navigate to='/login' />;
 };
+
+function AppLayout({ children }) {
+  const { isMobile, isTablet } = useWindowSize();
+  const isCollapsed = isMobile || isTablet;
+
+  return (
+    <div style={{ display: 'flex' }}>
+      <Sidebar />
+      <main style={{
+        marginLeft: isCollapsed ? 0 : 230,
+        flex: 1,
+        minHeight: '100vh',
+        background: '#f5f0eb',
+        paddingTop: isCollapsed ? 60 : 0,
+        transition: 'margin-left 0.3s ease',
+      }}>
+        {children}
+      </main>
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -22,21 +44,18 @@ function App() {
         <Route path='/login' element={<LoginPage />} />
         <Route path='/*' element={
           <PrivateRoute>
-            <div style={{ display: 'flex' }}>
-              <Sidebar />
-              <main style={{ marginLeft: 230, flex: 1, minHeight: '100vh', background: '#f5f0eb' }}>
-                <Routes>
-                  <Route path='/' element={<DashboardPage />} />
-                  <Route path='/staff' element={<StaffPage />} />
-                  <Route path='/attendance' element={<AttendancePage />} />
-                  <Route path='/tasks' element={<TasksPage />} />
-                  <Route path='/payroll' element={<PayrollPage />} />
-                  <Route path='/performance' element={<PerformancePage />} />
-                  <Route path='/inventory' element={<InventoryPage />} />
-                  <Route path='/inventory/:listId' element={<InventoryDetailPage />} />
-                </Routes>
-              </main>
-            </div>
+            <AppLayout>
+              <Routes>
+                <Route path='/' element={<DashboardPage />} />
+                <Route path='/staff' element={<StaffPage />} />
+                <Route path='/attendance' element={<AttendancePage />} />
+                <Route path='/tasks' element={<TasksPage />} />
+                <Route path='/payroll' element={<PayrollPage />} />
+                <Route path='/performance' element={<PerformancePage />} />
+                <Route path='/inventory' element={<InventoryPage />} />
+                <Route path='/inventory/:listId' element={<InventoryDetailPage />} />
+              </Routes>
+            </AppLayout>
           </PrivateRoute>
         } />
       </Routes>

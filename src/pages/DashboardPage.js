@@ -6,6 +6,7 @@ import { getAllPayroll } from '../services/payrollService';
 import { getAllPerformance } from '../services/performanceService';
 import { getAllLists } from '../services/inventoryService';
 import { useNavigate } from 'react-router-dom';
+import useWindowSize from '../hooks/useWindowSize';
 
 function DashboardPage() {
   const [staff, setStaff] = useState([]);
@@ -16,7 +17,8 @@ function DashboardPage() {
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  const { isMobile } = useWindowSize();
+  const isSmall = isMobile || isTablet;
   const today = new Date().toISOString().slice(0, 10);
 
   useEffect(() => { fetchData(); }, []);
@@ -79,7 +81,12 @@ function DashboardPage() {
     <div style={styles.page}>
 
       {/* Welcome Header */}
-      <div style={styles.welcomeBox}>
+      <div style={{ 
+             ...styles.welcomeBox, 
+             flexDirection: isSmall ? 'column' : 'row',
+             gap: isSmall ? 16 : 0,
+             alignItems: isSmall ? 'flex-start' : 'center',
+            }}>
         <div>
           <h1 style={styles.welcomeTitle}>{greeting()}, Admin 👋</h1>
           <p style={styles.welcomeDate}>{formatDate()}</p>
@@ -103,7 +110,12 @@ function DashboardPage() {
       </div>
 
       {/* Quick Stats */}
-      <div style={styles.statsGrid}>
+      <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', 
+            gap: 16, 
+            marginBottom: 20 
+          }}>
         {[
           { label: 'Total Staff', value: staff.length, sub: `${staff.filter(s => s.status === 'Active').length} active`, color: '#5c3d8f', bg: '#ede8f5', path: '/staff' },
           { label: 'Present Today', value: presentToday, sub: `${lateToday} late · ${absentToday} absent`, color: '#2e7d32', bg: '#e8f5e9', path: '/attendance' },
@@ -121,7 +133,12 @@ function DashboardPage() {
       </div>
 
       {/* Row 2 */}
-      <div style={styles.twoCol}>
+      <div style={{ 
+             display: 'grid', 
+             gridTemplateColumns: isSmall ? '1fr' : '1fr 1fr', 
+             gap: 16, 
+             marginBottom: 16 
+        }}>
 
         {/* Recent Tasks */}
         <div style={styles.card}>
