@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAllStaff, createStaff, deleteStaff, updateStaff } from '../services/staffService';
+import useWindowSize from '../hooks/useWindowSize';
 
 function StaffPage() {
   const [staff, setStaff] = useState([]);
@@ -12,6 +13,9 @@ function StaffPage() {
   const [search, setSearch] = useState('');
   const [filterDept, setFilterDept] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
+  const { isMobile } = useWindowSize();
+  const isSmall = isMobile || isTablet;
+
 
   useEffect(() => { fetchStaff(); }, []);
 
@@ -91,7 +95,12 @@ function StaffPage() {
       </div>
 
       {/* Stat Cards */}
-      <div style={styles.statsRow}>
+      <div style={{ 
+             display: 'grid', 
+             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+             gap: 16, 
+             marginBottom: 16 
+        }}>
         {[
           { label: 'Total Staff', value: staff.length, color: '#5c3d8f', bg: '#ede8f5' },
           { label: 'Active', value: staff.filter(s => s.status === 'Active').length, color: '#2e7d32', bg: '#e8f5e9' },
@@ -106,7 +115,12 @@ function StaffPage() {
       </div>
 
       {/* Department Breakdown */}
-      <div style={styles.deptRow}>
+      <div style={{ 
+             display: 'grid', 
+             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)', 
+             gap: 12, 
+             marginBottom: 20 
+        }}>
         {['Sales', 'Operations', 'Finance', 'Administration', 'Marketing'].map(dept => (
           <div key={dept} style={styles.deptCard}>
             <div style={styles.deptCount}>{staff.filter(s => s.department === dept).length}</div>
@@ -116,7 +130,14 @@ function StaffPage() {
       </div>
 
       {/* Search & Filter */}
-      <div style={styles.filterRow}>
+      <div style={{ 
+             display: 'flex', 
+             flexDirection: isSmall ? 'column' : 'row',
+             alignItems: isSmall ? 'flex-start' : 'center', 
+             gap: 12, 
+             marginBottom: 16,
+             flexWrap: 'wrap'
+           }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -135,7 +156,10 @@ function StaffPage() {
       </div>
 
       {/* Table */}
-      <div style={styles.tableWrap}>
+      <div style={{
+        ...styles.tableWrap,
+        overflowX: 'auto'
+      }}>
         <table style={styles.table}>
           <thead>
             <tr>

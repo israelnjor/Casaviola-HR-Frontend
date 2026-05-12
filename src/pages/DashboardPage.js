@@ -17,7 +17,7 @@ function DashboardPage() {
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { isMobile } = useWindowSize();
+  const { isMobile, isTablet } = useWindowSize();
   const isSmall = isMobile || isTablet;
   const today = new Date().toISOString().slice(0, 10);
 
