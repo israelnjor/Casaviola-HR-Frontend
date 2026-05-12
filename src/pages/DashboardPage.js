@@ -112,7 +112,7 @@ function DashboardPage() {
       {/* Quick Stats */}
       <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', 
+            gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', 
             gap: 16, 
             marginBottom: 20 
           }}>
@@ -146,7 +146,7 @@ function DashboardPage() {
             <h3 style={styles.cardTitle}>Recent Tasks</h3>
             <button style={styles.seeAll} onClick={() => navigate('/tasks')}>See all →</button>
           </div>
-          {tasks.slice(0, 5).map(task => {
+          {tasks.slice(0, 4).map(task => {
             const isOverdue = task.status !== 'Done' && task.dueDate && new Date(task.dueDate) < new Date();
             return (
               <div key={task._id} style={styles.taskRow}>
@@ -167,69 +167,6 @@ function DashboardPage() {
             );
           })}
           {tasks.length === 0 && <div style={styles.empty}>No tasks yet</div>}
-        </div>
-
-        {/* Staff Overview */}
-        <div style={styles.card}>
-          <div style={styles.cardHeader}>
-            <h3 style={styles.cardTitle}>Staff Overview</h3>
-            <button style={styles.seeAll} onClick={() => navigate('/staff')}>See all →</button>
-          </div>
-          {staff.slice(0, 6).map(s => (
-            <div key={s._id} style={styles.staffRow}>
-              <div style={styles.avatar}>{getInitials(s.fullName)}</div>
-              <div style={{ flex: 1 }}>
-                <div style={styles.staffName}>{s.fullName}</div>
-                <div style={styles.staffRole}>{s.role} · {s.department}</div>
-              </div>
-              <span style={{
-                padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
-                background: s.status === 'Active' ? '#e8f5e9' : s.status === 'On Leave' ? '#fff8e1' : '#fce4ec',
-                color: s.status === 'Active' ? '#2e7d32' : s.status === 'On Leave' ? '#f57f17' : '#c62828',
-              }}>{s.status}</span>
-            </div>
-          ))}
-          {staff.length === 0 && <div style={styles.empty}>No staff yet</div>}
-        </div>
-
-      </div>
-
-      {/* Row 3 */}
-      <div style={styles.twoCol}>
-
-        {/* Today's Attendance */}
-        <div style={styles.card}>
-          <div style={styles.cardHeader}>
-            <h3 style={styles.cardTitle}>Today's Attendance</h3>
-            <button style={styles.seeAll} onClick={() => navigate('/attendance')}>See all →</button>
-          </div>
-          <div style={styles.attStats}>
-            {[
-              { label: 'Present', value: presentToday, color: '#2e7d32', bg: '#e8f5e9' },
-              { label: 'Late', value: lateToday, color: '#f57f17', bg: '#fff8e1' },
-              { label: 'Absent', value: absentToday, color: '#c62828', bg: '#fce4ec' },
-            ].map((s, i) => (
-              <div key={i} style={{ ...styles.attCard, background: s.bg }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.value}</div>
-                <div style={{ fontSize: 11, color: s.color, fontWeight: 600 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-          {todayAttendance.slice(0, 4).map(a => (
-            <div key={a._id} style={styles.staffRow}>
-              <div style={styles.avatar}>{getInitials(a.staff?.fullName)}</div>
-              <div style={{ flex: 1 }}>
-                <div style={styles.staffName}>{a.staff?.fullName}</div>
-                <div style={styles.staffRole}>In: {a.clockIn} · Out: {a.clockOut || '—'}</div>
-              </div>
-              <span style={{
-                padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
-                background: a.status === 'Present' ? '#e8f5e9' : '#fff8e1',
-                color: a.status === 'Present' ? '#2e7d32' : '#f57f17',
-              }}>{a.status}</span>
-            </div>
-          ))}
-          {todayAttendance.length === 0 && <div style={styles.empty}>No attendance logged today</div>}
         </div>
 
         {/* Low Stock & Overdue Alerts */}
@@ -288,6 +225,69 @@ function DashboardPage() {
 
       </div>
 
+      {/* Row 3 */}
+      <div style={styles.twoCol}>
+
+        {/* Staff Overview */}
+        <div style={styles.card}>
+          <div style={styles.cardHeader}>
+            <h3 style={styles.cardTitle}>Staff Overview</h3>
+            <button style={styles.seeAll} onClick={() => navigate('/staff')}>See all →</button>
+          </div>
+          {staff.slice(0, 6).map(s => (
+            <div key={s._id} style={styles.staffRow}>
+              <div style={styles.avatar}>{getInitials(s.fullName)}</div>
+              <div style={{ flex: 1 }}>
+                <div style={styles.staffName}>{s.fullName}</div>
+                <div style={styles.staffRole}>{s.role} · {s.department}</div>
+              </div>
+              <span style={{
+                padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                background: s.status === 'Active' ? '#e8f5e9' : s.status === 'On Leave' ? '#fff8e1' : '#fce4ec',
+                color: s.status === 'Active' ? '#2e7d32' : s.status === 'On Leave' ? '#f57f17' : '#c62828',
+              }}>{s.status}</span>
+            </div>
+          ))}
+          {staff.length === 0 && <div style={styles.empty}>No staff yet</div>}
+        </div>
+
+        {/* Today's Attendance */}
+        <div style={styles.card}>
+          <div style={styles.cardHeader}>
+            <h3 style={styles.cardTitle}>Today's Attendance</h3>
+            <button style={styles.seeAll} onClick={() => navigate('/attendance')}>See all →</button>
+          </div>
+          <div style={styles.attStats}>
+            {[
+              { label: 'Present', value: presentToday, color: '#2e7d32', bg: '#e8f5e9' },
+              { label: 'Late', value: lateToday, color: '#f57f17', bg: '#fff8e1' },
+              { label: 'Absent', value: absentToday, color: '#c62828', bg: '#fce4ec' },
+            ].map((s, i) => (
+              <div key={i} style={{ ...styles.attCard, background: s.bg }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.value}</div>
+                <div style={{ fontSize: 11, color: s.color, fontWeight: 600 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+          {todayAttendance.slice(0, 4).map(a => (
+            <div key={a._id} style={styles.staffRow}>
+              <div style={styles.avatar}>{getInitials(a.staff?.fullName)}</div>
+              <div style={{ flex: 1 }}>
+                <div style={styles.staffName}>{a.staff?.fullName}</div>
+                <div style={styles.staffRole}>In: {a.clockIn} · Out: {a.clockOut || '—'}</div>
+              </div>
+              <span style={{
+                padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                background: a.status === 'Present' ? '#e8f5e9' : '#fff8e1',
+                color: a.status === 'Present' ? '#2e7d32' : '#f57f17',
+              }}>{a.status}</span>
+            </div>
+          ))}
+          {todayAttendance.length === 0 && <div style={styles.empty}>No attendance logged today</div>}
+        </div>
+
+      </div>
+
     </div>
   );
 }
@@ -328,4 +328,4 @@ const styles = {
   empty: { textAlign: 'center', color: '#ccc', fontSize: 13, padding: '20px 0' },
 };
 
-export default DashboardPage;
+export default DashboardPage
