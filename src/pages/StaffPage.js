@@ -101,6 +101,8 @@ function StaffPage() {
         gap: 12,
         marginBottom: 16,
         width: '100%',
+        padding: isSmall ? '0 2px' : 0,
+        paddingTop: isSmall ? 0 : 2,
       }}>
         {[
           { label: 'Total Staff', value: staff.length, color: '#5c3d8f', bg: '#ede8f5' },
@@ -122,7 +124,7 @@ function StaffPage() {
         gap: isMobile ? 6 : 12,
         marginBottom: 20,
       }}>
-        {['Sales', "Operations", 'Finance', "Admin'n", 'Marketing'].map(dept => (
+        {['Sales', "Operations", 'Finance', "Admin", 'Marketing'].map(dept => (
           <div key={dept} style={styles.deptCard}>
             <div style={styles.deptCount}>{staff.filter(s => s.department === dept).length}</div>
             <div style={{ ...styles.deptLabel, fontSize: isMobile ? 9 : 11 }}>{dept}</div>
@@ -410,7 +412,7 @@ const styles = {
   subtitle: { color: '#999', marginTop: 4, fontSize: 13 },
   addBtn: { background: '#5c3d8f', color: '#fff', border: 'none', padding: '11px 22px', borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: 'pointer' },
   statCard: { padding: '16px', borderRadius: 12, border: '1px solid', textAlign: 'center' },
-  deptCard: { background: '#fff', borderRadius: 10, padding: '12px 8px', textAlign: 'center', border: '1px solid #ede8f5' },
+  deptCard: { background: '#fff',border: '1px solid #d6c1f7', borderRadius: 10, padding: '12px 8px', textAlign: 'center' },
   deptCount: { fontSize: 20, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
   deptLabel: { color: '#aaa', marginTop: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' },
   searchInput: { flex: 1, padding: '10px 14px', borderRadius: 8, border: '1px solid #e0d8f0', fontSize: 14, outline: 'none', fontFamily: 'inherit', width: '100%', boxSizing: 'border-box' },
