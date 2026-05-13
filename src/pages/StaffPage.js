@@ -122,7 +122,7 @@ function StaffPage() {
         gap: 10,
         marginBottom: 20,
       }}>
-        {['Sales', 'Operations', 'Finance', 'Administration', 'Marketing'].map(dept => (
+        {['Sales', "Operations", 'Finance', "Admin'n", 'Marketing'].map(dept => (
           <div key={dept} style={styles.deptCard}>
             <div style={styles.deptCount}>{staff.filter(s => s.department === dept).length}</div>
             <div style={{ ...styles.deptLabel, fontSize: isMobile ? 9 : 11 }}>{dept}</div>
