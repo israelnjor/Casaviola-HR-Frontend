@@ -119,7 +119,7 @@ function StaffPage() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: isMobile ? 'repeat(5, 1fr)' : 'repeat(5, 1fr)',
-        gap: 10,
+        gap: isMobile ? 6 : 12,
         marginBottom: 20,
       }}>
         {['Sales', "Operations", 'Finance', "Admin'n", 'Marketing'].map(dept => (
