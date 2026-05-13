@@ -114,7 +114,7 @@ const styles = {
   },
   sidebar: {
     width: 230, minHeight: '100vh', background: '#fff',
-    borderRight: '1px solid #ede8f5', display: 'flex',
+    borderRight: '1px solid #e4dbf3', display: 'flex',
     flexDirection: 'column', position: 'fixed', top: 0, left: 0,
   },
   logo: { display: 'flex', alignItems: 'center', gap: 12, padding: '28px 20px', borderBottom: '1px solid #ede8f5' },

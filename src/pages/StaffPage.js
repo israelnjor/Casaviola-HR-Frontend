@@ -13,9 +13,9 @@ function StaffPage() {
   const [search, setSearch] = useState('');
   const [filterDept, setFilterDept] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
+
   const { isMobile, isTablet } = useWindowSize();
   const isSmall = isMobile || isTablet;
-
 
   useEffect(() => { fetchStaff(); }, []);
 
@@ -81,26 +81,26 @@ function StaffPage() {
   if (loading) return <div style={styles.loading}>Loading...</div>;
 
   return (
-    <div style={styles.page}>
+    <div style={{ ...styles.page, padding: isSmall ? '20px 16px' : '40px' }}>
 
       {/* Header */}
-      <div style={styles.header}>
+      <div style={{ ...styles.header, flexDirection: isSmall ? 'column' : 'row', gap: isSmall ? 12 : 0 }}>
         <div>
-          <h1 style={styles.title}>Staff Directory</h1>
+          <h1 style={{ ...styles.title, fontSize: isSmall ? 22 : 26 }}>Staff Directory</h1>
           <p style={styles.subtitle}>{staff.length} employees registered</p>
         </div>
-        <button style={styles.addBtn} onClick={() => setShowModal(true)}>
+        <button style={{ ...styles.addBtn, width: isSmall ? '100%' : 'auto' }} onClick={() => setShowModal(true)}>
           + Add Staff
         </button>
       </div>
 
       {/* Stat Cards */}
-      <div style={{ 
-             display: 'grid', 
-             gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : 'repeat(4, 1fr)', 
-             gap: 16, 
-             marginBottom: 16 
-        }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: 12,
+        marginBottom: 16,
+      }}>
         {[
           { label: 'Total Staff', value: staff.length, color: '#5c3d8f', bg: '#ede8f5' },
           { label: 'Active', value: staff.filter(s => s.status === 'Active').length, color: '#2e7d32', bg: '#e8f5e9' },
@@ -108,118 +108,140 @@ function StaffPage() {
           { label: 'Terminated', value: staff.filter(s => s.status === 'Terminated').length, color: '#c62828', bg: '#fce4ec' },
         ].map((s, i) => (
           <div key={i} style={{ ...styles.statCard, background: s.bg, borderColor: s.color + '33' }}>
-            <div style={{ fontSize: 28, fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.value}</div>
+            <div style={{ fontSize: isSmall ? 22 : 28, fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.value}</div>
             <div style={{ fontSize: 12, color: s.color, fontWeight: 600, marginTop: 4 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Department Breakdown */}
-      <div style={{ 
-             display: 'grid', 
-             gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(5, 1fr)', 
-             gap: 12, 
-             marginBottom: 20 
-        }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(5, 1fr)' : 'repeat(5, 1fr)',
+        gap: 10,
+        marginBottom: 20,
+      }}>
         {['Sales', 'Operations', 'Finance', 'Administration', 'Marketing'].map(dept => (
           <div key={dept} style={styles.deptCard}>
             <div style={styles.deptCount}>{staff.filter(s => s.department === dept).length}</div>
-            <div style={styles.deptLabel}>{dept}</div>
+            <div style={{ ...styles.deptLabel, fontSize: isMobile ? 9 : 11 }}>{dept}</div>
           </div>
         ))}
       </div>
 
       {/* Search & Filter */}
-      <div style={{ 
-             display: 'flex', 
-             flexDirection: isSmall ? 'column' : 'row',
-             alignItems: isSmall ? 'flex-start' : 'center', 
-             gap: 12, 
-             marginBottom: 16,
-             flexWrap: 'wrap'
-           }}>
+      <div style={{ display: 'flex', flexDirection: isSmall ? 'column' : 'row', alignItems: isSmall ? 'stretch' : 'center', gap: 10, marginBottom: 16 }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder='Search by name, role or email...'
           style={styles.searchInput}
         />
-        <div style={styles.filters}>
-          <select style={styles.filterSelect} value={filterDept} onChange={e => setFilterDept(e.target.value)}>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <select style={{ ...styles.filterSelect, flex: 1 }} value={filterDept} onChange={e => setFilterDept(e.target.value)}>
             {departments.map(d => <option key={d}>{d}</option>)}
           </select>
-          <select style={styles.filterSelect} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+          <select style={{ ...styles.filterSelect, flex: 1 }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
             {['All', 'Active', 'On Leave', 'Terminated'].map(s => <option key={s}>{s}</option>)}
           </select>
         </div>
         <span style={styles.filterCount}>{filteredStaff.length} results</span>
       </div>
 
-      {/* Table */}
-      <div style={{
-        ...styles.tableWrap,
-        overflowX: 'auto'
-      }}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              {['Employee', 'Department', 'Contact', 'Status', 'Actions'].map(col => (
-                <th key={col} style={styles.th}>{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStaff.length === 0 ? (
+      {/* Mobile Cards View */}
+      {isSmall ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {filteredStaff.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 40, color: '#aaa' }}>No staff found</div>
+          ) : (
+            filteredStaff.map(s => (
+              <div key={s._id} style={styles.mobileCard}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div style={styles.avatar}>{getInitials(s.fullName)}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={styles.name}>{s.fullName}</div>
+                    <div style={styles.subRow}>{s.role}</div>
+                  </div>
+                  <span style={statusStyle(s.status)}>{s.status}</span>
+                </div>
+                <div style={styles.mobileCardRow}>
+                  <span style={styles.mobileCardLabel}>Department</span>
+                  <span style={styles.deptBadge}>{s.department}</span>
+                </div>
+                {/* <div style={styles.mobileCardRow}>
+                  <span style={styles.mobileCardLabel}>Email</span>
+                  <span style={styles.mobileCardValue}>{s.email}</span>
+                </div> */}
+                <div style={styles.mobileCardRow}>
+                  <span style={styles.mobileCardLabel}>Phone</span>
+                  <span style={styles.mobileCardValue}>{s.phone}</span>
+                </div>
+                <div style={styles.mobileCardRow}>
+                  <span style={styles.mobileCardLabel}>Salary</span>
+                  <span style={{ ...styles.mobileCardValue, color: '#c9a84c', fontWeight: 700 }}>GH₵ {s.baseSalary?.toLocaleString()}</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                  <button style={{ ...styles.editBtn, flex: 1 }} onClick={() => { setEditForm(s); setShowEditModal(true); }}>Edit</button>
+                  <button style={{ ...styles.viewBtn, flex: 1 }} onClick={() => setSelectedStaff(s)}>View Profile</button>
+                  <button style={{ ...styles.removeBtn, flex: 1 }} onClick={() => handleDelete(s._id)}>Remove</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      ) : (
+        /* Desktop Table View */
+        <div style={styles.tableWrap}>
+          <table style={styles.table}>
+            <thead>
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', padding: 40, color: '#aaa' }}>
-                  No staff found
-                </td>
+                {['Employee', 'Department', 'Contact', 'Status', 'Actions'].map(col => (
+                  <th key={col} style={styles.th}>{col}</th>
+                ))}
               </tr>
-            ) : (
-              filteredStaff.map((s, i) => (
-                <tr key={s._id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8ff' }}>
-                  <td style={styles.td}>
-                    <div style={styles.employeeCell}>
-                      <div style={styles.avatar}>{getInitials(s.fullName)}</div>
-                      <div>
-                        <div style={styles.name}>{s.fullName}</div>
-                        <div style={styles.subRow}>
-                          {s.role} &nbsp;·&nbsp;
-                          <span style={styles.salary}>GH₵ {s.baseSalary?.toLocaleString()}</span>
+            </thead>
+            <tbody>
+              {filteredStaff.length === 0 ? (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: 40, color: '#aaa' }}>No staff found</td>
+                </tr>
+              ) : (
+                filteredStaff.map((s, i) => (
+                  <tr key={s._id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8ff' }}>
+                    <td style={styles.td}>
+                      <div style={styles.employeeCell}>
+                        <div style={styles.avatar}>{getInitials(s.fullName)}</div>
+                        <div>
+                          <div style={styles.name}>{s.fullName}</div>
+                          <div style={styles.subRow}>{s.role} &nbsp;·&nbsp;<span style={styles.salary}>GH₵ {s.baseSalary?.toLocaleString()}</span></div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td style={styles.td}>
-                    <span style={styles.deptBadge}>{s.department}</span>
-                  </td>
-                  <td style={styles.td}>
-                    <div style={styles.name}>{s.email}</div>
-                    <div style={styles.subRow}>{s.phone}</div>
-                  </td>
-                  <td style={styles.td}>
-                    <span style={statusStyle(s.status)}>{s.status}</span>
-                  </td>
-                  <td style={styles.td}>
-                    <div style={styles.actions}>
-                      <button style={styles.editBtn} onClick={() => { setEditForm(s); setShowEditModal(true); }}>Edit</button>
-                      <button style={styles.removeBtn} onClick={() => handleDelete(s._id)}>Remove</button>
-                    </div>
-                    <button style={styles.viewBtn} onClick={() => setSelectedStaff(s)}>
-                      View Full Profile
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                    </td>
+                    <td style={styles.td}><span style={styles.deptBadge}>{s.department}</span></td>
+                    <td style={styles.td}>
+                      <div style={styles.name}>{s.email}</div>
+                      <div style={styles.subRow}>{s.phone}</div>
+                    </td>
+                    <td style={styles.td}><span style={statusStyle(s.status)}>{s.status}</span></td>
+                    <td style={styles.td}>
+                      <div style={styles.actions}>
+                        <button style={styles.editBtn} onClick={() => { setEditForm(s); setShowEditModal(true); }}>Edit</button>
+                        <button style={styles.removeBtn} onClick={() => handleDelete(s._id)}>Remove</button>
+                      </div>
+                      <button style={styles.viewBtn} onClick={() => setSelectedStaff(s)}>View Full Profile</button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Side Drawer */}
       {selectedStaff && (
         <div style={styles.drawerOverlay} onClick={() => setSelectedStaff(null)}>
-          <div style={styles.drawer} onClick={e => e.stopPropagation()}>
+          <div style={{ ...styles.drawer, width: isSmall ? '100%' : 400 }} onClick={e => e.stopPropagation()}>
             <div style={styles.drawerHeader}>
               <div style={styles.drawerAvatar}>{getInitials(selectedStaff.fullName)}</div>
               <div>
@@ -292,12 +314,12 @@ function StaffPage() {
       {/* Add Staff Modal */}
       {showModal && (
         <div style={styles.overlay}>
-          <div style={styles.modal}>
+          <div style={{ ...styles.modal, padding: isSmall ? 20 : 32 }}>
             <div style={styles.modalHeader}>
               <h2 style={styles.modalTitle}>Add New Staff</h2>
               <button style={styles.closeBtn} onClick={() => setShowModal(false)}>✕</button>
             </div>
-            <div style={styles.formGrid}>
+            <div style={{ display: 'grid', gridTemplateColumns: isSmall ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 16 }}>
               {[
                 { label: 'Full Name', key: 'fullName' },
                 { label: 'Email', key: 'email' },
@@ -308,29 +330,20 @@ function StaffPage() {
               ].map(field => (
                 <div key={field.key}>
                   <label style={styles.formLabel}>{field.label}</label>
-                  <input
-                    type={field.type || 'text'}
-                    style={styles.input}
-                    value={form[field.key] || ''}
-                    onChange={e => setForm({ ...form, [field.key]: e.target.value })}
-                  />
+                  <input type={field.type || 'text'} style={styles.input} value={form[field.key] || ''} onChange={e => setForm({ ...form, [field.key]: e.target.value })} />
                 </div>
               ))}
               <div>
                 <label style={styles.formLabel}>Department</label>
                 <select style={styles.input} value={form.department || ''} onChange={e => setForm({ ...form, department: e.target.value })}>
                   <option value=''>Select...</option>
-                  {['Sales', 'Operations', 'Finance', 'Administration', 'Marketing'].map(d => (
-                    <option key={d}>{d}</option>
-                  ))}
+                  {['Sales', 'Operations', 'Finance', 'Administration', 'Marketing'].map(d => <option key={d}>{d}</option>)}
                 </select>
               </div>
               <div>
                 <label style={styles.formLabel}>Status</label>
                 <select style={styles.input} value={form.status || 'Active'} onChange={e => setForm({ ...form, status: e.target.value })}>
-                  {['Active', 'On Leave', 'Terminated'].map(s => (
-                    <option key={s}>{s}</option>
-                  ))}
+                  {['Active', 'On Leave', 'Terminated'].map(s => <option key={s}>{s}</option>)}
                 </select>
               </div>
             </div>
@@ -349,12 +362,12 @@ function StaffPage() {
       {/* Edit Staff Modal */}
       {showEditModal && (
         <div style={styles.overlay}>
-          <div style={styles.modal}>
+          <div style={{ ...styles.modal, padding: isSmall ? 20 : 32 }}>
             <div style={styles.modalHeader}>
               <h2 style={styles.modalTitle}>Edit Staff</h2>
               <button style={styles.closeBtn} onClick={() => setShowEditModal(false)}>✕</button>
             </div>
-            <div style={styles.formGrid}>
+            <div style={{ display: 'grid', gridTemplateColumns: isSmall ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 16 }}>
               {[
                 { label: 'Full Name', key: 'fullName' },
                 { label: 'Email', key: 'email' },
@@ -364,28 +377,19 @@ function StaffPage() {
               ].map(field => (
                 <div key={field.key}>
                   <label style={styles.formLabel}>{field.label}</label>
-                  <input
-                    type={field.type || 'text'}
-                    style={styles.input}
-                    value={editForm[field.key] || ''}
-                    onChange={e => setEditForm({ ...editForm, [field.key]: e.target.value })}
-                  />
+                  <input type={field.type || 'text'} style={styles.input} value={editForm[field.key] || ''} onChange={e => setEditForm({ ...editForm, [field.key]: e.target.value })} />
                 </div>
               ))}
               <div>
                 <label style={styles.formLabel}>Department</label>
                 <select style={styles.input} value={editForm.department || ''} onChange={e => setEditForm({ ...editForm, department: e.target.value })}>
-                  {['Sales', 'Operations', 'Finance', 'Administration', 'Marketing'].map(d => (
-                    <option key={d}>{d}</option>
-                  ))}
+                  {['Sales', 'Operations', 'Finance', 'Administration', 'Marketing'].map(d => <option key={d}>{d}</option>)}
                 </select>
               </div>
               <div>
                 <label style={styles.formLabel}>Status</label>
                 <select style={styles.input} value={editForm.status || ''} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
-                  {['Active', 'On Leave', 'Terminated'].map(s => (
-                    <option key={s}>{s}</option>
-                  ))}
+                  {['Active', 'On Leave', 'Terminated'].map(s => <option key={s}>{s}</option>)}
                 </select>
               </div>
             </div>
@@ -402,23 +406,23 @@ function StaffPage() {
 }
 
 const styles = {
-  page: { minHeight: '100vh', background: '#f5f0eb', padding: '40px' },
+  page: { minHeight: '100vh', background: '#f5f0eb', marginTop: 0,  paddingTop: -10 },
   loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#5c3d8f' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 },
-  title: { fontSize: 26, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 },
+  title: { fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
   subtitle: { color: '#999', marginTop: 4, fontSize: 13 },
   addBtn: { background: '#5c3d8f', color: '#fff', border: 'none', padding: '11px 22px', borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: 'pointer' },
-  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 16 },
-  statCard: { padding: '20px 24px', borderRadius: 12, border: '1px solid', textAlign: 'center' },
-  deptRow: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 20 },
-  deptCard: { background: '#fff', borderRadius: 10, padding: '14px 16px', textAlign: 'center', border: '1px solid #ede8f5' },
-  deptCount: { fontSize: 22, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
-  deptLabel: { fontSize: 11, color: '#aaa', marginTop: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' },
-  filterRow: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' },
-  searchInput: { flex: 1, minWidth: 200, padding: '10px 14px', borderRadius: 8, border: '1px solid #e0d8f0', fontSize: 14, outline: 'none', fontFamily: 'inherit' },
-  filters: { display: 'flex', gap: 8 },
+  statCard: { padding: '16px', borderRadius: 12, border: '1px solid', textAlign: 'center' },
+  deptCard: { background: '#fff', borderRadius: 10, padding: '12px 8px', textAlign: 'center', border: '1px solid #ede8f5' },
+  deptCount: { fontSize: 20, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
+  deptLabel: { color: '#aaa', marginTop: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' },
+  searchInput: { flex: 1, padding: '10px 14px', borderRadius: 8, border: '1px solid #e0d8f0', fontSize: 14, outline: 'none', fontFamily: 'inherit', width: '100%', boxSizing: 'border-box' },
   filterSelect: { padding: '9px 14px', borderRadius: 8, border: '1px solid #e0d8f0', fontSize: 13, outline: 'none', fontFamily: 'inherit', background: '#fff', color: '#555' },
   filterCount: { fontSize: 13, color: '#5c3d8f', fontWeight: 600 },
+  mobileCard: { background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #ede8f5', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' },
+  mobileCardRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  mobileCardLabel: { fontSize: 12, color: '#aaa', fontWeight: 500 },
+  mobileCardValue: { fontSize: 13, color: '#2d1b4e', fontWeight: 500, textAlign: 'right', maxWidth: '60%' },
   tableWrap: { background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.06)', border: '1px solid #ede8f5' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { textAlign: 'left', padding: '14px 20px', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#aaa', borderBottom: '1px solid #f0eaf8', background: '#faf8ff' },
@@ -429,24 +433,23 @@ const styles = {
   subRow: { fontSize: 12, color: '#aaa', marginTop: 3 },
   salary: { color: '#c9a84c', fontWeight: 600 },
   deptBadge: { background: '#ede8f5', color: '#5c3d8f', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600 },
-  actions: { display: 'flex', gap: 8 },
+  actions: { display: 'flex', gap: 8, marginBottom: 6 },
   editBtn: { padding: '6px 14px', borderRadius: 7, border: '1px solid #ede8f5', background: '#fff', color: '#5c3d8f', fontWeight: 600, fontSize: 12, cursor: 'pointer' },
   removeBtn: { padding: '6px 14px', borderRadius: 7, border: 'none', background: '#fce4ec', color: '#c62828', fontWeight: 600, fontSize: 12, cursor: 'pointer' },
-  viewBtn: { marginTop: 6, width: '100%', padding: '5px 0', borderRadius: 7, border: '1px solid #ede8f5', background: '#faf8ff', color: '#5c3d8f', fontWeight: 600, fontSize: 12, cursor: 'pointer' },
+  viewBtn: { padding: '6px 14px', borderRadius: 7, border: '1px solid #ede8f5', background: '#faf8ff', color: '#5c3d8f', fontWeight: 600, fontSize: 12, cursor: 'pointer' },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 },
-  modal: { background: '#fff', borderRadius: 20, padding: 32, width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto' },
+  modal: { background: '#fff', borderRadius: 20, width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 22, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
   closeBtn: { background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#888' },
-  formGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 },
   formLabel: { display: 'block', fontSize: 12, color: '#888', marginBottom: 6, fontWeight: 500 },
   input: { width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid #e0d8f0', fontSize: 14, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' },
   modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 },
   cancelBtn: { padding: '10px 20px', borderRadius: 8, border: '1px solid #ddd', background: '#fff', color: '#888', fontWeight: 600, cursor: 'pointer' },
   saveBtn: { padding: '10px 24px', borderRadius: 8, border: 'none', background: '#5c3d8f', color: '#fff', fontWeight: 600, cursor: 'pointer' },
   drawerOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 999 },
-  drawer: { position: 'fixed', top: 0, right: 0, width: 400, height: '100vh', background: '#fff', boxShadow: '-4px 0 24px rgba(0,0,0,0.1)', overflowY: 'auto', zIndex: 1000, padding: 28 },
-  drawerHeader: { display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20, position: 'relative' },
+  drawer: { position: 'fixed', top: 0, right: 0, height: '100vh', background: '#fff', boxShadow: '-4px 0 24px rgba(0,0,0,0.1)', overflowY: 'auto', zIndex: 1000, padding: 28 },
+  drawerHeader: { display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 },
   drawerAvatar: { width: 56, height: 56, borderRadius: '50%', background: '#ede8f5', color: '#5c3d8f', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18, fontFamily: 'Georgia, serif', flexShrink: 0 },
   drawerName: { fontSize: 18, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
   drawerRole: { fontSize: 13, color: '#999', marginTop: 3 },
