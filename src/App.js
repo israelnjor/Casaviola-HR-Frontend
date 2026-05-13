@@ -28,8 +28,9 @@ function AppLayout({ children }) {
         flex: 1,
         minHeight: '100vh',
         background: '#f5f0eb',
-        paddingTop: isCollapsed ? 60 : 0,
+        paddingTop: isCollapsed ? 20 : 0,
         transition: 'margin-left 0.3s ease',
+        maxWidth: '100%',
       }}>
         {children}
       </main>

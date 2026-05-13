@@ -100,6 +100,7 @@ function StaffPage() {
         gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
         gap: 12,
         marginBottom: 16,
+        width: '100%',
       }}>
         {[
           { label: 'Total Staff', value: staff.length, color: '#5c3d8f', bg: '#ede8f5' },
@@ -402,7 +403,7 @@ function StaffPage() {
 }
 
 const styles = {
-  page: { minHeight: '100vh', background: '#f5f0eb', marginTop: 0, paddingTop: -10 },
+  page: { minHeight: '100vh', background: '#f5f0eb', marginTop: 0, paddingTop: 0 },
   loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#5c3d8f' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 },
   title: { fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
