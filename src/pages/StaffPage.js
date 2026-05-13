@@ -81,7 +81,7 @@ function StaffPage() {
   if (loading) return <div style={styles.loading}>Loading...</div>;
 
   return (
-    <div style={{ ...styles.page, padding: isSmall ? '20px 16px' : '40px' }}>
+    <div style={{ ...styles.page, padding: isSmall ? '8px 16px 20px' : '40px' }}>
 
       {/* Header */}
       <div style={{ ...styles.header, flexDirection: isSmall ? 'column' : 'row', gap: isSmall ? 12 : 0 }}>
@@ -97,7 +97,7 @@ function StaffPage() {
       {/* Stat Cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
         gap: 12,
         marginBottom: 16,
       }}>
@@ -168,10 +168,6 @@ function StaffPage() {
                   <span style={styles.mobileCardLabel}>Department</span>
                   <span style={styles.deptBadge}>{s.department}</span>
                 </div>
-                {/* <div style={styles.mobileCardRow}>
-                  <span style={styles.mobileCardLabel}>Email</span>
-                  <span style={styles.mobileCardValue}>{s.email}</span>
-                </div> */}
                 <div style={styles.mobileCardRow}>
                   <span style={styles.mobileCardLabel}>Phone</span>
                   <span style={styles.mobileCardValue}>{s.phone}</span>
@@ -406,7 +402,7 @@ function StaffPage() {
 }
 
 const styles = {
-  page: { minHeight: '100vh', background: '#f5f0eb', marginTop: 0,  paddingTop: -10 },
+  page: { minHeight: '100vh', background: '#f5f0eb', marginTop: 0, paddingTop: -10 },
   loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#5c3d8f' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 },
   title: { fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },

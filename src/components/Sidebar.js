@@ -113,7 +113,7 @@ const styles = {
     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 199,
   },
   sidebar: {
-    width: 230, minHeight: '100vh', background: '#fff',
+    width: 230, minHeight: '100%', background: '#fff',
     borderRight: '1px solid #e4dbf3', display: 'flex',
     flexDirection: 'column', position: 'fixed', top: 0, left: 0,
   },
