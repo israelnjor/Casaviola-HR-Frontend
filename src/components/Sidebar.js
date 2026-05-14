@@ -103,11 +103,14 @@ function Sidebar() {
 
 const styles = {
   hamburger: {
-    position: 'fixed', top: 16, left: 16, zIndex: 300,
+    position: 'fixed', top: '18px', left: '18px', zIndex: 300,
     background: '#2d1b4e', color: '#fff', border: 'none',
-    borderRadius: 8, width: 40, height: 40, fontSize: 18,
+    borderRadius: 10, width: 40, height: 40, fontSize: 18,
     cursor: 'pointer', display: 'flex', alignItems: 'center',
     justifyContent: 'center',
+    border: '1px solid #c8bddbd4',
+    borderLeft: 'none',
+    borderTop: 'none',
   },
   overlay: {
     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 199,
