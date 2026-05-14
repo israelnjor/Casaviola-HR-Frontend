@@ -103,7 +103,7 @@ function Sidebar() {
 
 const styles = {
   hamburger: {
-    position: 'fixed', top: '18px', left: '18px', zIndex: 300,
+    position: 'fixed', top: 18, left: 18, zIndex: 300,
     background: '#2d1b4e', color: '#fff', border: 'none',
     borderRadius: 10, width: 40, height: 40, fontSize: 18,
     cursor: 'pointer', display: 'flex', alignItems: 'center',
