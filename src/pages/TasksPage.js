@@ -15,7 +15,7 @@ function TasksPage() {
   const [expandedTask, setExpandedTask] = useState(null);
 
   const { isMobile, isTablet } = useWindowSize();
-  const isSmall = isMobile;
+  const isSmall = isMobile || isTablet;
 
   useEffect(() => { fetchData(); }, []);
 
