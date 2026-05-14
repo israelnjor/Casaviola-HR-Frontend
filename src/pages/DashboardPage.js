@@ -78,44 +78,51 @@ function DashboardPage() {
   if (loading) return <div style={styles.loading}>Loading...</div>;
 
   return (
-    <div style={styles.page}>
+    <div style={{ ...styles.page, padding: isSmall ? '8px 16px 24px' : '40px' }}>
 
       {/* Welcome Header */}
-      <div style={{ 
-             ...styles.welcomeBox, 
-             flexDirection: isSmall ? 'column' : 'row',
-             gap: isSmall ? 16 : 0,
-             alignItems: isSmall ? 'flex-start' : 'center',
-            }}>
-        <div>
-          <h1 style={styles.welcomeTitle}>{greeting()}, Admin 👋</h1>
+      <div style={{
+        ...styles.welcomeBox,
+        flexDirection: 'column',
+        alignItems: isSmall ? 'center' : 'flex-start',
+        padding: isSmall ? '20px 20px' : '28px 32px',
+        gap: 16,
+        textAlign: isSmall ? 'center' : 'left',
+      }}>
+        <div style={{ width: '100%' }}>
+          <h1 style={{ ...styles.welcomeTitle, fontSize: isSmall ? 20 : 26 }}>{greeting()}, Admin 👋</h1>
           <p style={styles.welcomeDate}>{formatDate()}</p>
         </div>
-        <div style={styles.welcomeStats}>
+        <div style={{
+          ...styles.welcomeStats,
+          width: '100%',
+          justifyContent: isSmall ? 'space-around' : 'flex-start',
+          gap: isSmall ? 0 : 24,
+        }}>
           <div style={styles.welcomeStat}>
-            <span style={styles.welcomeStatNum}>{staff.filter(s => s.status === 'Active').length}</span>
+            <span style={{ ...styles.welcomeStatNum, fontSize: isSmall ? 22 : 26 }}>{staff.filter(s => s.status === 'Active').length}</span>
             <span style={styles.welcomeStatLabel}>Active Staff</span>
           </div>
           <div style={styles.welcomeDivider} />
           <div style={styles.welcomeStat}>
-            <span style={styles.welcomeStatNum}>{tasks.filter(t => t.status === 'Done').length}</span>
+            <span style={{ ...styles.welcomeStatNum, fontSize: isSmall ? 22 : 26 }}>{tasks.filter(t => t.status === 'Done').length}</span>
             <span style={styles.welcomeStatLabel}>Tasks Done</span>
           </div>
           <div style={styles.welcomeDivider} />
           <div style={styles.welcomeStat}>
-            <span style={{ ...styles.welcomeStatNum, color: overdueTasks.length > 0 ? '#c62828' : '#2e7d32' }}>{overdueTasks.length}</span>
+            <span style={{ ...styles.welcomeStatNum, fontSize: isSmall ? 22 : 26, color: overdueTasks.length > 0 ? '#c62828' : '#2e7d32' }}>{overdueTasks.length}</span>
             <span style={styles.welcomeStatLabel}>Overdue</span>
           </div>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : isTablet ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)', 
-            gap: 16, 
-            marginBottom: 20 
-          }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isTablet ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)',
+        gap: isMobile ? 10 : 16,
+        marginBottom: 16,
+      }}>
         {[
           { label: 'Total Staff', value: staff.length, sub: `${staff.filter(s => s.status === 'Active').length} active`, color: '#5c3d8f', bg: '#ede8f5', path: '/staff' },
           { label: 'Present Today', value: presentToday, sub: `${lateToday} late · ${absentToday} absent`, color: '#2e7d32', bg: '#e8f5e9', path: '/attendance' },
@@ -124,21 +131,27 @@ function DashboardPage() {
           { label: 'Avg KPI Score', value: `${avgKpi}%`, sub: `${performance.length} reviews`, color: '#c9a84c', bg: '#fffde7', path: '/performance' },
           { label: 'Inventory Lists', value: inventory.length, sub: `${lowStockItems.length} low stock`, color: lowStockItems.length > 0 ? '#c62828' : '#5c3d8f', bg: lowStockItems.length > 0 ? '#fce4ec' : '#ede8f5', path: '/inventory' },
         ].map((s, i) => (
-          <div key={i} onClick={() => navigate(s.path)} style={{ ...styles.statCard, background: s.bg, borderColor: s.color + '33', cursor: 'pointer' }}>
-            <div style={{ fontSize: 11, color: s.color, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700, marginBottom: 8 }}>{s.label}</div>
-            <div style={{ fontSize: 26, fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.value}</div>
-            <div style={{ fontSize: 12, color: s.color + 'aa', marginTop: 4 }}>{s.sub}</div>
+          <div key={i} onClick={() => navigate(s.path)} style={{
+            ...styles.statCard,
+            background: s.bg,
+            borderColor: s.color + '33',
+            cursor: 'pointer',
+            padding: isMobile ? '14px 16px' : '20px 24px',
+          }}>
+            <div style={{ fontSize: isMobile ? 10 : 11, color: s.color, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700, marginBottom: 6 }}>{s.label}</div>
+            <div style={{ fontSize: isMobile ? 20 : 26, fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.value}</div>
+            <div style={{ fontSize: isMobile ? 10 : 12, color: s.color + 'aa', marginTop: 4 }}>{s.sub}</div>
           </div>
         ))}
       </div>
 
-      {/* Row 2 */}
-      <div style={{ 
-             display: 'grid', 
-             gridTemplateColumns: isSmall ? '1fr' : '1fr 1fr', 
-             gap: 16, 
-             marginBottom: 16 
-        }}>
+      {/* Row 2 — Recent Tasks & Alerts */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isSmall ? '1fr' : '1fr 1fr',
+        gap: 16,
+        marginBottom: 16,
+      }}>
 
         {/* Recent Tasks */}
         <div style={styles.card}>
@@ -151,15 +164,15 @@ function DashboardPage() {
             return (
               <div key={task._id} style={styles.taskRow}>
                 <div style={{ width: 3, height: 40, borderRadius: 2, background: task.status === 'Done' ? '#2e7d32' : task.status === 'In Progress' ? '#1565c0' : isOverdue ? '#c62828' : '#f57f17', flexShrink: 0 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={styles.taskTitle}>{task.title}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ ...styles.taskTitle, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{task.title}</div>
                   <div style={styles.taskMeta}>
                     {task.assignedTo?.fullName} · Due {task.dueDate?.slice(0, 10) || '—'}
                     {isOverdue && <span style={styles.overdueBadge}>Overdue</span>}
                   </div>
                 </div>
                 <span style={{
-                  padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                  padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, flexShrink: 0,
                   background: task.status === 'Done' ? '#e8f5e9' : task.status === 'In Progress' ? '#e3f2fd' : '#fff8e1',
                   color: task.status === 'Done' ? '#2e7d32' : task.status === 'In Progress' ? '#1565c0' : '#f57f17',
                 }}>{task.status}</span>
@@ -169,7 +182,7 @@ function DashboardPage() {
           {tasks.length === 0 && <div style={styles.empty}>No tasks yet</div>}
         </div>
 
-        {/* Low Stock & Overdue Alerts */}
+        {/* Alerts */}
         <div style={styles.card}>
           <div style={styles.cardHeader}>
             <h3 style={styles.cardTitle}>Alerts</h3>
@@ -181,7 +194,7 @@ function DashboardPage() {
               {overdueTasks.slice(0, 3).map(t => (
                 <div key={t._id} style={styles.alertRow}>
                   <div style={styles.alertDot} />
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <div style={styles.alertTitle}>{t.title}</div>
                     <div style={styles.alertSub}>Assigned to {t.assignedTo?.fullName} · Due {t.dueDate?.slice(0, 10)}</div>
                   </div>
@@ -225,8 +238,13 @@ function DashboardPage() {
 
       </div>
 
-      {/* Row 3 */}
-      <div style={styles.twoCol}>
+      {/* Row 3 — Staff Overview & Today's Attendance */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isSmall ? '1fr' : '1fr 1fr',
+        gap: 16,
+        marginBottom: 16,
+      }}>
 
         {/* Staff Overview */}
         <div style={styles.card}>
@@ -237,12 +255,12 @@ function DashboardPage() {
           {staff.slice(0, 6).map(s => (
             <div key={s._id} style={styles.staffRow}>
               <div style={styles.avatar}>{getInitials(s.fullName)}</div>
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={styles.staffName}>{s.fullName}</div>
-                <div style={styles.staffRole}>{s.role} · {s.department}</div>
+                <div style={{ ...styles.staffRole, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.role} · {s.department}</div>
               </div>
               <span style={{
-                padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, flexShrink: 0,
                 background: s.status === 'Active' ? '#e8f5e9' : s.status === 'On Leave' ? '#fff8e1' : '#fce4ec',
                 color: s.status === 'Active' ? '#2e7d32' : s.status === 'On Leave' ? '#f57f17' : '#c62828',
               }}>{s.status}</span>
@@ -272,12 +290,12 @@ function DashboardPage() {
           {todayAttendance.slice(0, 4).map(a => (
             <div key={a._id} style={styles.staffRow}>
               <div style={styles.avatar}>{getInitials(a.staff?.fullName)}</div>
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={styles.staffName}>{a.staff?.fullName}</div>
                 <div style={styles.staffRole}>In: {a.clockIn} · Out: {a.clockOut || '—'}</div>
               </div>
               <span style={{
-                padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, flexShrink: 0,
                 background: a.status === 'Present' ? '#e8f5e9' : '#fff8e1',
                 color: a.status === 'Present' ? '#2e7d32' : '#f57f17',
               }}>{a.status}</span>
@@ -293,19 +311,17 @@ function DashboardPage() {
 }
 
 const styles = {
-  page: { minHeight: '100vh', background: '#f5f0eb', padding: '40px' },
+  page: { minHeight: '100vh', background: '#f5f0eb' },
   loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#5c3d8f' },
-  welcomeBox: { background: '#2d1b4e', borderRadius: 16, padding: '28px 32px', marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  welcomeTitle: { fontSize: 26, fontWeight: 700, color: '#fff', fontFamily: 'Georgia, serif' },
+  welcomeBox: { background: '#2d1b4e', borderRadius: 16, marginBottom: 16, display: 'flex' },
+  welcomeTitle: { fontWeight: 700, color: '#fff', fontFamily: 'Georgia, serif', margin: 0 },
   welcomeDate: { color: '#9b7fc7', marginTop: 4, fontSize: 14 },
-  welcomeStats: { display: 'flex', alignItems: 'center', gap: 24 },
+  welcomeStats: { display: 'flex', alignItems: 'center' },
   welcomeStat: { textAlign: 'center' },
-  welcomeStatNum: { display: 'block', fontSize: 26, fontWeight: 700, color: '#c9a84c', fontFamily: 'Georgia, serif' },
+  welcomeStatNum: { display: 'block', fontWeight: 700, color: '#c9a84c', fontFamily: 'Georgia, serif' },
   welcomeStatLabel: { display: 'block', fontSize: 11, color: '#9b7fc7', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.06em' },
-  welcomeDivider: { width: 1, height: 40, background: '#3d2860' },
-  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 20 },
-  statCard: { padding: '20px 24px', borderRadius: 12, border: '1px solid', transition: 'transform 0.15s', },
-  twoCol: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 },
+  welcomeDivider: { width: 1, height: 40, background: '#3d2860', margin: '0 20px' },
+  statCard: { borderRadius: 12, border: '1px solid', transition: 'transform 0.15s' },
   card: { background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 2px 12px rgba(0,0,0,0.05)', border: '1px solid #ede8f5' },
   cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   cardTitle: { fontSize: 16, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
@@ -328,4 +344,4 @@ const styles = {
   empty: { textAlign: 'center', color: '#ccc', fontSize: 13, padding: '20px 0' },
 };
 
-export default DashboardPage
+export default DashboardPage;

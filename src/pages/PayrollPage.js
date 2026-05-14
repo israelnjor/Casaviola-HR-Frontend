@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAllPayroll, createPayroll, updatePayroll, deletePayroll } from '../services/payrollService';
 import { getAllStaff } from '../services/staffService';
+import useWindowSize from '../hooks/useWindowSize';
 
 function PayrollPage() {
   const [payroll, setPayroll] = useState([]);
@@ -10,6 +11,9 @@ function PayrollPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [form, setForm] = useState({ bonus: 0, deductions: 0 });
   const [editForm, setEditForm] = useState({});
+
+  const { isMobile, isTablet } = useWindowSize();
+  const isSmall = isMobile || isTablet;
 
   useEffect(() => { fetchData(); }, []);
 
@@ -67,14 +71,12 @@ function PayrollPage() {
   };
 
   const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').slice(0, 2);
-
   const netPay = (f) => Number(f.basicSalary || 0) + Number(f.bonus || 0) - Number(f.deductions || 0);
 
   const totalPayroll = payroll.reduce((sum, p) => sum + (p.netPay || 0), 0);
   const totalPaid = payroll.filter(p => p.status === 'Paid').reduce((sum, p) => sum + (p.netPay || 0), 0);
   const totalPending = payroll.filter(p => p.status === 'Pending').reduce((sum, p) => sum + (p.netPay || 0), 0);
 
-  // Auto-fill basic salary when staff is selected
   const handleStaffSelect = (staffId) => {
     const selected = staff.find(s => s._id === staffId);
     setForm({ ...form, staff: staffId, basicSalary: selected?.baseSalary || 0 });
@@ -83,19 +85,33 @@ function PayrollPage() {
   if (loading) return <div style={styles.loading}>Loading...</div>;
 
   return (
-    <div style={styles.page}>
+    <div style={{ ...styles.page, padding: isSmall ? '8px 16px 24px' : '40px' }}>
 
       {/* Header */}
-      <div style={styles.header}>
+      <div style={{
+        ...styles.header,
+        flexDirection: isSmall ? 'column' : 'row',
+        alignItems: isSmall ? 'center' : 'center',
+        textAlign: isSmall ? 'center' : 'left',
+        gap: isSmall ? 12 : 0,
+        marginBottom: isSmall ? 16 : 28,
+      }}>
         <div>
-          <h1 style={styles.title}>Payroll & Compensation</h1>
+          <h1 style={{ ...styles.title, fontSize: isSmall ? 22 : 26 }}>Payroll & Compensation</h1>
           <p style={styles.subtitle}>Manage monthly staff salaries and payments</p>
         </div>
-        <button style={styles.addBtn} onClick={() => setShowModal(true)}>+ Run Payroll</button>
+        <button style={{ ...styles.addBtn, width: isSmall ? '100%' : 'auto' }} onClick={() => setShowModal(true)}>
+          + Run Payroll
+        </button>
       </div>
 
       {/* Stat Cards */}
-      <div style={styles.statsRow}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+        gap: 12,
+        marginBottom: 16,
+      }}>
         {[
           { label: 'Total Payroll', value: `GH₵ ${totalPayroll.toLocaleString()}`, color: '#5c3d8f', bg: '#ede8f5' },
           { label: 'Total Paid', value: `GH₵ ${totalPaid.toLocaleString()}`, color: '#2e7d32', bg: '#e8f5e9' },
@@ -103,80 +119,142 @@ function PayrollPage() {
           { label: 'Total Records', value: payroll.length, color: '#1565c0', bg: '#e3f2fd' },
         ].map((s, i) => (
           <div key={i} style={{ ...styles.statCard, background: s.bg, borderColor: s.color + '33' }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif' }}>{s.value}</div>
+            <div style={{ fontSize: isSmall ? 16 : 22, fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif', wordBreak: 'break-word' }}>{s.value}</div>
             <div style={{ fontSize: 12, color: s.color, fontWeight: 600, marginTop: 4 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Table */}
-      <div style={styles.tableWrap}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              {['Employee', 'Month', 'Basic (GH₵)', 'Bonus', 'Deductions', 'Net Pay', 'Status', 'Actions'].map(col => (
-                <th key={col} style={styles.th}>{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {payroll.length === 0 ? (
+      {/* Mobile Cards / Desktop Table */}
+      {isSmall ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {payroll.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 40, color: '#aaa', background: '#fff', borderRadius: 12, border: '1px solid #ede8f5' }}>
+              No payroll records yet
+            </div>
+          ) : (
+            payroll.map(p => (
+              <div key={p._id} style={styles.mobileCard}>
+                {/* Employee Row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div style={styles.avatar}>{getInitials(p.staff?.fullName)}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={styles.name}>{p.staff?.fullName}</div>
+                    <div style={styles.subRow}>{p.staff?.role}</div>
+                  </div>
+                  <span style={{
+                    padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, flexShrink: 0,
+                    background: p.status === 'Paid' ? '#e8f5e9' : '#fff8e1',
+                    color: p.status === 'Paid' ? '#2e7d32' : '#f57f17',
+                  }}>{p.status}</span>
+                </div>
+
+                {/* Pay Breakdown */}
+                <div style={{ background: '#faf8ff', borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+                  <div style={styles.mobileCardRow}>
+                    <span style={styles.mobileCardLabel}>Month</span>
+                    <span style={styles.mobileCardValue}>{p.month}</span>
+                  </div>
+                  <div style={styles.mobileCardRow}>
+                    <span style={styles.mobileCardLabel}>Basic Salary</span>
+                    <span style={styles.mobileCardValue}>GH₵ {p.basicSalary?.toLocaleString()}</span>
+                  </div>
+                  <div style={styles.mobileCardRow}>
+                    <span style={styles.mobileCardLabel}>Bonus</span>
+                    <span style={{ ...styles.mobileCardValue, color: '#2e7d32', fontWeight: 700 }}>+GH₵ {p.bonus?.toLocaleString()}</span>
+                  </div>
+                  <div style={styles.mobileCardRow}>
+                    <span style={styles.mobileCardLabel}>Deductions</span>
+                    <span style={{ ...styles.mobileCardValue, color: '#c62828', fontWeight: 700 }}>-GH₵ {p.deductions?.toLocaleString()}</span>
+                  </div>
+                  <div style={{ borderTop: '1px solid #ede8f5', marginTop: 8, paddingTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#5c3d8f', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Net Pay</span>
+                    <span style={{ fontSize: 18, fontWeight: 700, color: '#5c3d8f', fontFamily: 'Georgia, serif' }}>GH₵ {p.netPay?.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {p.status === 'Pending' && (
+                    <button style={{ ...styles.paidBtn, flex: 1 }} onClick={() => handleMarkPaid(p._id)}>Mark Paid</button>
+                  )}
+                  <button style={{ ...styles.editBtn, flex: 1 }} onClick={() => { setEditForm(p); setShowEditModal(true); }}>Edit</button>
+                  <button style={{ ...styles.removeBtn, flex: 1 }} onClick={() => handleDelete(p._id)}>Delete</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      ) : (
+        /* Desktop Table */
+        <div style={{ ...styles.tableWrap, overflowX: 'auto' }}>
+          <table style={styles.table}>
+            <thead>
               <tr>
-                <td colSpan={8} style={{ textAlign: 'center', padding: 40, color: '#aaa' }}>
-                  No payroll records yet
-                </td>
+                {['Employee', 'Month', 'Basic (GH₵)', 'Bonus', 'Deductions', 'Net Pay', 'Status', 'Actions'].map(col => (
+                  <th key={col} style={styles.th}>{col}</th>
+                ))}
               </tr>
-            ) : (
-              payroll.map((p, i) => (
-                <tr key={p._id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8ff' }}>
-                  <td style={styles.td}>
-                    <div style={styles.employeeCell}>
-                      <div style={styles.avatar}>{getInitials(p.staff?.fullName)}</div>
-                      <div>
-                        <div style={styles.name}>{p.staff?.fullName}</div>
-                        <div style={styles.subRow}>{p.staff?.role}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={styles.td}>{p.month}</td>
-                  <td style={styles.td}>{p.basicSalary?.toLocaleString()}</td>
-                  <td style={{ ...styles.td, color: '#2e7d32', fontWeight: 600 }}>+{p.bonus?.toLocaleString()}</td>
-                  <td style={{ ...styles.td, color: '#c62828', fontWeight: 600 }}>-{p.deductions?.toLocaleString()}</td>
-                  <td style={{ ...styles.td, color: '#5c3d8f', fontWeight: 700, fontSize: 15 }}>GH₵ {p.netPay?.toLocaleString()}</td>
-                  <td style={styles.td}>
-                    <span style={{
-                      padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-                      background: p.status === 'Paid' ? '#e8f5e9' : '#fff8e1',
-                      color: p.status === 'Paid' ? '#2e7d32' : '#f57f17',
-                    }}>{p.status}</span>
-                  </td>
-                  <td style={styles.td}>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {p.status === 'Pending' && (
-                        <button style={styles.paidBtn} onClick={() => handleMarkPaid(p._id)}>Mark Paid</button>
-                      )}
-                      <button style={styles.editBtn} onClick={() => { setEditForm(p); setShowEditModal(true); }}>Edit</button>
-                      <button style={styles.removeBtn} onClick={() => handleDelete(p._id)}>Delete</button>
-                    </div>
+            </thead>
+            <tbody>
+              {payroll.length === 0 ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: 40, color: '#aaa' }}>
+                    No payroll records yet
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                payroll.map((p, i) => (
+                  <tr key={p._id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8ff' }}>
+                    <td style={styles.td}>
+                      <div style={styles.employeeCell}>
+                        <div style={styles.avatar}>{getInitials(p.staff?.fullName)}</div>
+                        <div>
+                          <div style={styles.name}>{p.staff?.fullName}</div>
+                          <div style={styles.subRow}>{p.staff?.role}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={styles.td}>{p.month}</td>
+                    <td style={styles.td}>{p.basicSalary?.toLocaleString()}</td>
+                    <td style={{ ...styles.td, color: '#2e7d32', fontWeight: 600 }}>+{p.bonus?.toLocaleString()}</td>
+                    <td style={{ ...styles.td, color: '#c62828', fontWeight: 600 }}>-{p.deductions?.toLocaleString()}</td>
+                    <td style={{ ...styles.td, color: '#5c3d8f', fontWeight: 700, fontSize: 15 }}>GH₵ {p.netPay?.toLocaleString()}</td>
+                    <td style={styles.td}>
+                      <span style={{
+                        padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                        background: p.status === 'Paid' ? '#e8f5e9' : '#fff8e1',
+                        color: p.status === 'Paid' ? '#2e7d32' : '#f57f17',
+                      }}>{p.status}</span>
+                    </td>
+                    <td style={styles.td}>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {p.status === 'Pending' && (
+                          <button style={styles.paidBtn} onClick={() => handleMarkPaid(p._id)}>Mark Paid</button>
+                        )}
+                        <button style={styles.editBtn} onClick={() => { setEditForm(p); setShowEditModal(true); }}>Edit</button>
+                        <button style={styles.removeBtn} onClick={() => handleDelete(p._id)}>Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Add Payroll Modal */}
       {showModal && (
         <div style={styles.overlay}>
-          <div style={styles.modal}>
+          <div style={{ ...styles.modal, padding: isSmall ? 20 : 32 }}>
             <div style={styles.modalHeader}>
               <h2 style={styles.modalTitle}>Run Payroll</h2>
               <button style={styles.closeBtn} onClick={() => setShowModal(false)}>✕</button>
             </div>
 
-            <div style={styles.formGrid}>
-              <div>
+            <div style={{ display: 'grid', gridTemplateColumns: isSmall ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div style={{ gridColumn: isSmall ? '1' : 'span 2' }}>
                 <label style={styles.formLabel}>Staff Member</label>
                 <select style={styles.input} value={form.staff || ''} onChange={e => handleStaffSelect(e.target.value)}>
                   <option value=''>Select staff...</option>
@@ -201,7 +279,6 @@ function PayrollPage() {
               </div>
             </div>
 
-            {/* Net Pay Preview */}
             {form.basicSalary && (
               <div style={styles.netPayPreview}>
                 <span style={{ color: '#888', fontSize: 13 }}>Net Pay: </span>
@@ -227,13 +304,13 @@ function PayrollPage() {
       {/* Edit Payroll Modal */}
       {showEditModal && (
         <div style={styles.overlay}>
-          <div style={styles.modal}>
+          <div style={{ ...styles.modal, padding: isSmall ? 20 : 32 }}>
             <div style={styles.modalHeader}>
               <h2 style={styles.modalTitle}>Edit Payroll</h2>
               <button style={styles.closeBtn} onClick={() => setShowEditModal(false)}>✕</button>
             </div>
 
-            <div style={styles.formGrid}>
+            <div style={{ display: 'grid', gridTemplateColumns: isSmall ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 16 }}>
               <div>
                 <label style={styles.formLabel}>Month</label>
                 <input style={styles.input} value={editForm.month || ''} onChange={e => setEditForm({ ...editForm, month: e.target.value })} />
@@ -252,7 +329,6 @@ function PayrollPage() {
               </div>
             </div>
 
-            {/* Net Pay Preview */}
             <div style={styles.netPayPreview}>
               <span style={{ color: '#888', fontSize: 13 }}>Net Pay: </span>
               <span style={{ color: '#5c3d8f', fontWeight: 700, fontSize: 20, fontFamily: 'Georgia, serif' }}>
@@ -278,14 +354,17 @@ function PayrollPage() {
 }
 
 const styles = {
-  page: { minHeight: '100vh', background: '#f5f0eb', padding: '40px' },
+  page: { minHeight: '100vh', background: '#f5f0eb' },
   loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#5c3d8f' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 },
-  title: { fontSize: 26, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
+  header: { display: 'flex', justifyContent: 'space-between' },
+  title: { fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif', margin: 0 },
   subtitle: { color: '#999', marginTop: 4, fontSize: 13 },
   addBtn: { background: '#5c3d8f', color: '#fff', border: 'none', padding: '11px 22px', borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: 'pointer' },
-  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 },
-  statCard: { padding: '20px 24px', borderRadius: 12, border: '1px solid', textAlign: 'center' },
+  statCard: { padding: '16px', borderRadius: 12, border: '1px solid', textAlign: 'center' },
+  mobileCard: { background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #ede8f5', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' },
+  mobileCardRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  mobileCardLabel: { fontSize: 12, color: '#aaa', fontWeight: 500 },
+  mobileCardValue: { fontSize: 13, color: '#2d1b4e', fontWeight: 500 },
   tableWrap: { background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.06)', border: '1px solid #ede8f5' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { textAlign: 'left', padding: '14px 20px', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#aaa', borderBottom: '1px solid #f0eaf8', background: '#faf8ff' },
@@ -299,11 +378,10 @@ const styles = {
   removeBtn: { padding: '6px 12px', borderRadius: 7, border: 'none', background: '#fce4ec', color: '#c62828', fontWeight: 600, fontSize: 12, cursor: 'pointer' },
   netPayPreview: { background: '#ede8f5', borderRadius: 10, padding: '14px 20px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 },
-  modal: { background: '#fff', borderRadius: 20, padding: 32, width: '100%', maxWidth: 520, maxHeight: '90vh', overflowY: 'auto' },
+  modal: { background: '#fff', borderRadius: 20, width: '100%', maxWidth: 520, maxHeight: '90vh', overflowY: 'auto' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 22, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
   closeBtn: { background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#888' },
-  formGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 },
   formLabel: { display: 'block', fontSize: 12, color: '#888', marginBottom: 6, fontWeight: 500 },
   input: { width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid #e0d8f0', fontSize: 14, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' },
   modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 },

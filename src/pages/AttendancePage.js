@@ -73,15 +73,24 @@ function AttendancePage() {
   if (loading) return <div style={styles.loading}>Loading...</div>;
 
   return (
-    <div style={{ ...styles.page, padding: isSmall ? '20px 16px' : '40px' }}>
+    <div style={{ ...styles.page, padding: isSmall ? '8px 16px 20px' : '40px' }}>
 
       {/* Header */}
-      <div style={{ ...styles.header, flexDirection: isSmall ? 'column' : 'row', alignItems: isSmall ? 'flex-start' : 'center', gap: isSmall ? 12 : 0 }}>
-        <div>
+      <div style={{
+        ...styles.header,
+        flexDirection: isSmall ? 'column' : 'row',
+        alignItems: isSmall ? 'center' : 'center',
+        gap: isSmall ? 12 : 0,
+        marginBottom: isSmall ? 16 : 24,
+      }}>
+        <div style={{ textAlign: isSmall ? 'center' : 'left' }}>
           <h1 style={{ ...styles.title, fontSize: isSmall ? 22 : 26 }}>Attendance</h1>
           <p style={styles.subtitle}>Track daily staff attendance</p>
         </div>
-        <button style={{ ...styles.addBtn}} onClick={() => setShowModal(true)}>
+        <button
+          style={{ ...styles.addBtn, width: isSmall ? '100%' : 'auto' }}
+          onClick={() => setShowModal(true)}
+        >
           + Log Attendance
         </button>
       </div>
@@ -89,9 +98,9 @@ function AttendancePage() {
       {/* Stat Cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : 'repeat(4, 1fr)',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
         gap: 12,
-        marginBottom: 20,
+        marginBottom: 16,
       }}>
         {[
           { label: 'Present', value: filteredRecords.filter(r => r.status === 'Present').length, color: '#2e7d32', bg: '#e8f5e9' },
@@ -107,85 +116,171 @@ function AttendancePage() {
       </div>
 
       {/* Date Filter */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{
+        display: 'flex',
+        alignItems: isSmall ? 'stretch' : 'center',
+        flexDirection: isSmall ? 'column' : 'row',
+        gap: 10,
+        marginBottom: 16,
+      }}>
         <span style={styles.dateLabel}>Viewing:</span>
         <input
           type="date"
           value={selectedDate}
           onChange={e => setSelectedDate(e.target.value)}
-          style={styles.dateInput}
+          style={{ ...styles.dateInput, width: isSmall ? '100%' : 'auto', boxSizing: 'border-box' }}
         />
         <span style={styles.dateCount}>{filteredRecords.length} records</span>
       </div>
 
-      {/* Table */}
-      <div style={{ ...styles.tableWrap, overflowX: 'auto' }}>
-        <table style={{ ...styles.table, minWidth: isSmall ? 600 : '100%' }}>
-          <thead>
-            <tr>
-              {['Employee', 'Date', 'Clock In', 'Clock Out', 'Status', 'Notes', 'Actions'].map(col => (
-                <th key={col} style={styles.th}>{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRecords.length === 0 ? (
+      {/* Daily Records — Mobile Cards / Desktop Table */}
+      {isSmall ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif', marginBottom: 4 }}>
+            Records for {selectedDate}
+          </div>
+          {filteredRecords.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 32, color: '#aaa', background: '#fff', borderRadius: 12, border: '1px solid #ede8f5' }}>
+              No attendance records for this date
+            </div>
+          ) : (
+            filteredRecords.map(r => (
+              <div key={r._id} style={styles.mobileCard}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div style={styles.avatar}>{getInitials(r.staff?.fullName)}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={styles.name}>{r.staff?.fullName}</div>
+                    <div style={styles.subRow}>{r.staff?.role}</div>
+                  </div>
+                  <span style={statusStyle(r.status)}>{r.status}</span>
+                </div>
+                <div style={styles.mobileCardRow}>
+                  <span style={styles.mobileCardLabel}>Date</span>
+                  <span style={styles.mobileCardValue}>{r.date?.slice(0, 10)}</span>
+                </div>
+                <div style={styles.mobileCardRow}>
+                  <span style={styles.mobileCardLabel}>Clock In</span>
+                  <span style={styles.mobileCardValue}>{r.clockIn || '—'}</span>
+                </div>
+                <div style={styles.mobileCardRow}>
+                  <span style={styles.mobileCardLabel}>Clock Out</span>
+                  <span style={styles.mobileCardValue}>{r.clockOut || '—'}</span>
+                </div>
+                {r.notes && (
+                  <div style={styles.mobileCardRow}>
+                    <span style={styles.mobileCardLabel}>Notes</span>
+                    <span style={{ ...styles.mobileCardValue, color: '#aaa' }}>{r.notes}</span>
+                  </div>
+                )}
+                <div style={{ marginTop: 12 }}>
+                  <button style={{ ...styles.removeBtn, width: '100%' }} onClick={() => handleDelete(r._id)}>Delete</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      ) : (
+        /* Desktop Table — Daily */
+        <div style={{ ...styles.tableWrap, overflowX: 'auto', marginBottom: 16 }}>
+          <table style={styles.table}>
+            <thead>
               <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: 40, color: '#aaa' }}>
-                  No attendance records for this date
-                </td>
+                {['Employee', 'Date', 'Clock In', 'Clock Out', 'Status', 'Notes', 'Actions'].map(col => (
+                  <th key={col} style={styles.th}>{col}</th>
+                ))}
               </tr>
-            ) : (
-              filteredRecords.map((r, i) => (
-                <tr key={r._id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8ff' }}>
-                  <td style={styles.td}>
-                    <div style={styles.employeeCell}>
-                      <div style={styles.avatar}>{getInitials(r.staff?.fullName)}</div>
-                      <div>
-                        <div style={styles.name}>{r.staff?.fullName}</div>
-                        <div style={styles.subRow}>{r.staff?.role}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={styles.td}>{r.date?.slice(0, 10)}</td>
-                  <td style={styles.td}>{r.clockIn || '—'}</td>
-                  <td style={styles.td}>{r.clockOut || '—'}</td>
-                  <td style={styles.td}><span style={statusStyle(r.status)}>{r.status}</span></td>
-                  <td style={{ ...styles.td, color: '#aaa', fontSize: 13 }}>{r.notes || '—'}</td>
-                  <td style={styles.td}>
-                    <button style={styles.removeBtn} onClick={() => handleDelete(r._id)}>Delete</button>
+            </thead>
+            <tbody>
+              {filteredRecords.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: 40, color: '#aaa' }}>
+                    No attendance records for this date
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                filteredRecords.map((r, i) => (
+                  <tr key={r._id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8ff' }}>
+                    <td style={styles.td}>
+                      <div style={styles.employeeCell}>
+                        <div style={styles.avatar}>{getInitials(r.staff?.fullName)}</div>
+                        <div>
+                          <div style={styles.name}>{r.staff?.fullName}</div>
+                          <div style={styles.subRow}>{r.staff?.role}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={styles.td}>{r.date?.slice(0, 10)}</td>
+                    <td style={styles.td}>{r.clockIn || '—'}</td>
+                    <td style={styles.td}>{r.clockOut || '—'}</td>
+                    <td style={styles.td}><span style={statusStyle(r.status)}>{r.status}</span></td>
+                    <td style={{ ...styles.td, color: '#aaa', fontSize: 13 }}>{r.notes || '—'}</td>
+                    <td style={styles.td}>
+                      <button style={styles.removeBtn} onClick={() => handleDelete(r._id)}>Delete</button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      {/* Full Log */}
-      <div style={{ ...styles.tableWrap, overflowX: 'auto', marginTop: 16 }}>
-        <h3 style={{ padding: '16px 20px', fontSize: 16, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif', borderBottom: '1px solid #f0eaf8' }}>Full Attendance Log</h3>
-        <table style={{ ...styles.table, minWidth: isSmall ? 600 : '100%' }}>
-          <thead>
-            <tr>
-              {['Employee', 'Date', 'Clock In', 'Clock Out', 'Status'].map(col => (
-                <th key={col} style={styles.th}>{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {[...records].reverse().map((a, i) => (
-              <tr key={a._id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8ff' }}>
-                <td style={{ ...styles.td, fontWeight: 500 }}>{a.staff?.fullName || 'Unknown'}</td>
-                <td style={{ ...styles.td, color: '#aaa' }}>{a.date?.slice(0, 10)}</td>
-                <td style={styles.td}>{a.clockIn}</td>
-                <td style={styles.td}>{a.clockOut || '—'}</td>
-                <td style={styles.td}><span style={statusStyle(a.status)}>{a.status}</span></td>
-              </tr>
+      {/* Full Attendance Log — Mobile Cards / Desktop Table */}
+      {isSmall ? (
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif', marginBottom: 12 }}>
+            Full Attendance Log
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[...records].reverse().map(a => (
+              <div key={a._id} style={{ ...styles.mobileCard, padding: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <div style={styles.name}>{a.staff?.fullName || 'Unknown'}</div>
+                  <span style={statusStyle(a.status)}>{a.status}</span>
+                </div>
+                <div style={styles.mobileCardRow}>
+                  <span style={styles.mobileCardLabel}>Date</span>
+                  <span style={styles.mobileCardValue}>{a.date?.slice(0, 10)}</span>
+                </div>
+                <div style={styles.mobileCardRow}>
+                  <span style={styles.mobileCardLabel}>Clock In</span>
+                  <span style={styles.mobileCardValue}>{a.clockIn || '—'}</span>
+                </div>
+                <div style={styles.mobileCardRow}>
+                  <span style={styles.mobileCardLabel}>Clock Out</span>
+                  <span style={styles.mobileCardValue}>{a.clockOut || '—'}</span>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{ ...styles.tableWrap, overflowX: 'auto' }}>
+          <h3 style={{ padding: '16px 20px', fontSize: 16, fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif', borderBottom: '1px solid #f0eaf8' }}>
+            Full Attendance Log
+          </h3>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                {['Employee', 'Date', 'Clock In', 'Clock Out', 'Status'].map(col => (
+                  <th key={col} style={styles.th}>{col}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[...records].reverse().map((a, i) => (
+                <tr key={a._id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8ff' }}>
+                  <td style={{ ...styles.td, fontWeight: 500 }}>{a.staff?.fullName || 'Unknown'}</td>
+                  <td style={{ ...styles.td, color: '#aaa' }}>{a.date?.slice(0, 10)}</td>
+                  <td style={styles.td}>{a.clockIn}</td>
+                  <td style={styles.td}>{a.clockOut || '—'}</td>
+                  <td style={styles.td}><span style={statusStyle(a.status)}>{a.status}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (
@@ -244,14 +339,18 @@ function AttendancePage() {
 const styles = {
   page: { minHeight: '100vh', background: '#f5f0eb' },
   loading: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#5c3d8f' },
-  header: { display: 'flex', justifyContent: 'space-between', marginBottom: 24 },
-  title: { fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif' },
+  header: { display: 'flex', justifyContent: 'space-between' },
+  title: { fontWeight: 700, color: '#2d1b4e', fontFamily: 'Georgia, serif', margin: 0 },
   subtitle: { color: '#999', marginTop: 4, fontSize: 13 },
   addBtn: { background: '#5c3d8f', color: '#fff', border: 'none', padding: '11px 22px', borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: 'pointer' },
   statCard: { padding: '16px', borderRadius: 12, border: '1px solid', textAlign: 'center' },
   dateLabel: { fontSize: 13, color: '#888', fontWeight: 500 },
   dateInput: { padding: '8px 12px', borderRadius: 8, border: '1px solid #e0d8f0', fontSize: 14, outline: 'none', fontFamily: 'inherit' },
   dateCount: { fontSize: 13, color: '#5c3d8f', fontWeight: 600 },
+  mobileCard: { background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #ede8f5', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' },
+  mobileCardRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  mobileCardLabel: { fontSize: 12, color: '#aaa', fontWeight: 500 },
+  mobileCardValue: { fontSize: 13, color: '#2d1b4e', fontWeight: 500, textAlign: 'right', maxWidth: '60%' },
   tableWrap: { background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.06)', border: '1px solid #ede8f5' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { textAlign: 'left', padding: '14px 20px', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#aaa', borderBottom: '1px solid #f0eaf8', background: '#faf8ff' },
