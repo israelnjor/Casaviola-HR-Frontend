@@ -10,6 +10,8 @@ function ManageLoginsPage() {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdAccount, setCreatedAccount] = useState(null);
   const [form, setForm] = useState({ role: 'Customer Service' });
   const { isMobile, isTablet } = useWindowSize();
   const isSmall = isMobile || isTablet;
@@ -35,10 +37,21 @@ function ManageLoginsPage() {
     }
   };
 
+  const generatePassword = () => {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
+    let password = '';
+    for (let i = 0; i < 10; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setForm(prev => ({ ...prev, password }));
+  };
+
   const handleCreate = async () => {
     try {
       await createStaffLogin(form);
       setShowModal(false);
+      setCreatedAccount({ name: form.name, email: form.email, password: form.password, role: form.role });
+      setShowSuccessModal(true);
       setForm({ role: 'Customer Service' });
       fetchData();
     } catch (error) {
@@ -132,7 +145,10 @@ function ManageLoginsPage() {
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                  <button style={{ ...styles.toggleBtn, flex: 1, background: l.isActive ? '#fff8e1' : '#e8f5e9', color: l.isActive ? '#f57f17' : '#2e7d32' }} onClick={() => handleToggle(l._id)}>
+                  <button
+                    style={{ ...styles.toggleBtn, flex: 1, background: l.isActive ? '#fff8e1' : '#e8f5e9', color: l.isActive ? '#f57f17' : '#2e7d32' }}
+                    onClick={() => handleToggle(l._id)}
+                  >
                     {l.isActive ? 'Deactivate' : 'Activate'}
                   </button>
                   <button style={{ ...styles.removeBtn, flex: 1 }} onClick={() => handleDelete(l._id)}>Delete</button>
@@ -244,7 +260,22 @@ function ManageLoginsPage() {
               </div>
               <div>
                 <label style={styles.formLabel}>Password</label>
-                <input type='password' style={styles.input} value={form.password || ''} onChange={e => setForm({ ...form, password: e.target.value })} placeholder='Set a password' />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type='text'
+                    style={{ ...styles.input, flex: 1, fontFamily: 'monospace', letterSpacing: 2 }}
+                    value={form.password || ''}
+                    onChange={e => setForm({ ...form, password: e.target.value })}
+                    placeholder='Set or generate...'
+                  />
+                  <button
+                    type='button'
+                    onClick={generatePassword}
+                    style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #ede8f5', background: '#ede8f5', color: '#5c3d8f', fontWeight: 600, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  >
+                    Generate
+                  </button>
+                </div>
               </div>
               <div>
                 <label style={styles.formLabel}>Role</label>
@@ -257,12 +288,80 @@ function ManageLoginsPage() {
             </div>
 
             <div style={{ background: '#ede8f5', borderRadius: 10, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#5c3d8f' }}>
-              ℹ️ Share the email and password with the staff member so they can log in.
+              ℹ️ A ready-to-share message will appear after creating the login.
             </div>
 
             <div style={styles.modalFooter}>
               <button style={styles.cancelBtn} onClick={() => setShowModal(false)}>Cancel</button>
               <button style={styles.saveBtn} onClick={handleCreate}>Create Login</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal — Ready to Share */}
+      {showSuccessModal && createdAccount && (
+        <div style={styles.overlay}>
+          <div style={{ ...styles.modal, padding: isSmall ? 20 : 32 }}>
+            <div style={styles.modalHeader}>
+              <h2 style={{ ...styles.modalTitle, color: '#2e7d32' }}>✅ Login Created!</h2>
+              <button style={styles.closeBtn} onClick={() => setShowSuccessModal(false)}>✕</button>
+            </div>
+
+            <p style={{ fontSize: 13, color: '#888', marginBottom: 16 }}>
+              Copy the message below and share it with <strong>{createdAccount.name}</strong>:
+            </p>
+
+            {/* Email Preview Box */}
+            <div style={{ background: '#faf8ff', border: '1px solid #ede8f5', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+              <div style={{ fontSize: 13, color: '#2d1b4e', lineHeight: 1.8 }}>
+                <div style={{ marginBottom: 8 }}>
+                  <strong style={{ color: '#5c3d8f' }}>Subject:</strong> Your CasaViola Staff Portal Access
+                </div>
+                <div style={{ height: 1, background: '#ede8f5', margin: '12px 0' }} />
+                <p>Hi <strong>{createdAccount.name}</strong>,</p>
+                <br />
+                <p>Your CasaViola Staff Portal account has been created. Here are your login details:</p>
+                <br />
+                <div style={{ background: '#fff', border: '1px solid #ede8f5', borderRadius: 8, padding: '12px 16px', marginBottom: 8 }}>
+                  <div style={{ marginBottom: 6 }}>
+                    <strong>Portal:</strong>{' '}
+                    <span style={{ color: '#5c3d8f' }}>https://casaviola-hr-frontend.vercel.app</span>
+                  </div>
+                  <div style={{ marginBottom: 6 }}>
+                    <strong>Email:</strong> {createdAccount.email}
+                  </div>
+                  <div style={{ marginBottom: 6 }}>
+                    <strong>Password:</strong>{' '}
+                    <span style={{ fontFamily: 'monospace', background: '#ede8f5', padding: '2px 8px', borderRadius: 4, letterSpacing: 2, fontWeight: 700 }}>
+                      {createdAccount.password}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>Role:</strong> {createdAccount.role}
+                  </div>
+                </div>
+                <p>Please log in and keep your credentials safe.</p>
+                <br />
+                <p>Regards,</p>
+                <p><strong>CasaViola Properties</strong></p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                style={{ ...styles.saveBtn, flex: 1 }}
+                onClick={() => {
+                  const text = `Hi ${createdAccount.name},\n\nYour CasaViola Staff Portal account has been created. Here are your login details:\n\nPortal: https://casaviola-hr-frontend.vercel.app\nEmail: ${createdAccount.email}\nPassword: ${createdAccount.password}\nRole: ${createdAccount.role}\n\nPlease log in and keep your credentials safe.\n\nRegards,\nCasaViola Properties`;
+                  navigator.clipboard.writeText(text);
+                  alert('✅ Message copied to clipboard!');
+                }}
+              >
+                📋 Copy Message
+              </button>
+              <button style={{ ...styles.cancelBtn, flex: 1 }} onClick={() => setShowSuccessModal(false)}>
+                Close
+              </button>
             </div>
           </div>
         </div>
