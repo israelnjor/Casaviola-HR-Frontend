@@ -10,6 +10,8 @@ import InventoryPage from './pages/InventoryPage';
 import InventoryDetailPage from './pages/InventoryDetailPage';
 import LoginPage from './pages/LoginPage';
 import useWindowSize from './hooks/useWindowSize';
+import MessagesPage from './pages/MessagesPage';
+import ManageLoginsPage from './pages/ManageLoginsPage';
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('casaviola_token');
@@ -55,6 +57,9 @@ function App() {
                 <Route path='/performance' element={<PerformancePage />} />
                 <Route path='/inventory' element={<InventoryPage />} />
                 <Route path='/inventory/:listId' element={<InventoryDetailPage />} />
+                <Route path='/messages' element={<MessagesPage/>} />
+                <Route path='/logins' element={<ManageLoginsPage />} />
+                {/* <Route path='*' element={<Navigate to='/' />} /> */}
               </Routes>
             </AppLayout>
           </PrivateRoute>
