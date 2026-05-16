@@ -34,7 +34,7 @@ function MessagesPage() {
   const { isMobile, isTablet } = useWindowSize();
   const isSmall = isMobile || isTablet;
 
-  useEffect(() => { fetchAlerts(); }, []);
+  useEffect(() => { fetchAlerts(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchAlerts = async () => {
     try {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import useWindowSize from '../hooks/useWindowSize';
-import { getRole, canManageStaff, canViewPayroll, canManageAttendance } from '../utils/roleUtils';
+import { getRole, canManageStaff, canViewPayroll } from '../utils/roleUtils';
 
 function Sidebar() {
   const navigate = useNavigate();
